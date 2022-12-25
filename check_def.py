@@ -30,6 +30,7 @@ button_select=range(600,800)
 button_open=True
 lcdlight=0
 order=0
+user_select=0
 #=============================================================================================
 def start():
     global board

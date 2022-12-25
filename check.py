@@ -1,10 +1,30 @@
 from check_def import *
 #=============================================================================================
-def choose_menu_job():
+def homepage():
+    try:
+        while True:
+            a=0
+            while a!=homepage_waittime:
+                a+=runtime()
+            for a in range(int(homepage_waittime/cpu_and_memory_waittime)):
+                cpu_and_memory()
+            for a in range(int(homepage_waittime/network_waittime)):
+                network(network_LAN_inf)
+    except KeyboardInterrupt:
+        log_out("程式被手動停止")
+        msg("manually stop")
+        exit()
+    except Exception as e:
+        log_out(f"發生錯誤,錯誤為:{e}")
+        msg("Error:",f"{e}")
+        exit()
+#=============================================================================================
+def choose_menu_job1():
     in_choose_menu=0
     is_button_right_yes=0
     menu=0
-    order=0
+    global order
+    global user_select
     try:
         while True:
             if check_button(button_right):
@@ -20,6 +40,13 @@ def choose_menu_job():
                     menu=0
                     is_button_right_yes=0
                     order=0
+            elif check_button(button_select):
+                in_choose_menu=0
+                if in_choose_menu==0 and is_button_right_yes==1:
+                    lock.release()
+                    user_select=1
+                    menu=0
+                    is_button_right_yes=0
             if menu==1:
                 if check_button(button_up):
                     order-=1
@@ -41,27 +68,35 @@ def choose_menu_job():
         msg("Error:",f"{e}")
         exit()
 #=============================================================================================
-def homepage():
+def choose_menu_job2():
+    global user_select
     try:
         while True:
-            a=0
-            while a!=homepage_waittime:
-                a+=runtime()
-            for a in range(int(homepage_waittime/cpu_and_memory_waittime)):
-                cpu_and_memory()
-            for a in range(int(homepage_waittime/network_waittime)):
-                network(network_LAN_inf)
-    except KeyboardInterrupt:
-        log_out("程式被手動停止")
-        msg("manually stop")
-        exit()
+            if check_button(button_left) and user_select>=1:
+                lock.release()
+                user_select=0
+            if user_select==1:
+                lock.acquire()
+            if user_select>=1:
+                user_select+=1
+                if order==0:
+                    lock.release()
+                    user_select=0
+                if order==1:
+                    cpu_and_memory()
+                if order==2:
+                    network(network_LAN_inf)
+            print(user_select)
+            time.sleep(0.01)
     except Exception as e:
         log_out(f"發生錯誤,錯誤為:{e}")
         msg("Error:",f"{e}")
         exit()
-#=============================================================================================
 start()
-thread1=threading.Thread(target=choose_menu_job)
+thread1=threading.Thread(target=choose_menu_job1)
+thread2=threading.Thread(target=choose_menu_job2)
 thread1.daemon = True
+thread2.daemon = True
 thread1.start()
+thread2.start()
 homepage()
