@@ -1,43 +1,67 @@
 from check_def import *
-menu=0
-def job1():
-    global menu
+#=============================================================================================
+def choose_menu_job():
+    in_choose_menu=0
+    is_button_right_yes=0
+    menu=0
+    order=0
     try:
         while True:
             if check_button(button_right):
-                menu=1
-            if check_button(button_left):
-                menu=0
-            print(menu)
+                in_choose_menu+=1
+                is_button_right_yes=1
+                if in_choose_menu==1:
+                    lock.acquire()
+                    menu+=1
+            elif check_button(button_left):
+                in_choose_menu=0
+                if in_choose_menu==0 and is_button_right_yes==1:
+                    lock.release()
+                    menu=0
+                    is_button_right_yes=0
+                    order=0
+            if menu==1:
+                if check_button(button_up):
+                    order-=1
+                elif check_button(button_down):
+                    order+=1
+                if order==0:
+                    msg("homepage")
+                elif order==1:
+                    msg("cpu and memory")
+                elif order==2:
+                    msg("network")
+                elif order==3:
+                    msg("menu test")
+                elif order>3 or order<0:
+                    order=0
+            time.sleep(0.01)
     except Exception as e:
-        log_out(f"發生錯誤,錯誤為: [{e}]")
+        log_out(f"發生錯誤,錯誤為:{e}")
         msg("Error:",f"{e}")
         exit()
-
-def job2():
+#=============================================================================================
+def homepage():
     try:
         while True:
-            if menu==0:
-                homepage()
-            if menu==1:
-                msg("menu test")
+            a=0
+            while a!=homepage_waittime:
+                a+=runtime()
+            for a in range(int(homepage_waittime/cpu_and_memory_waittime)):
+                cpu_and_memory()
+            for a in range(int(homepage_waittime/network_waittime)):
+                network(network_LAN_inf)
+    except KeyboardInterrupt:
+        log_out("程式被手動停止")
+        msg("manually stop")
+        exit()
     except Exception as e:
-        log_out(f"發生錯誤,錯誤為: [{e}]")
+        log_out(f"發生錯誤,錯誤為:{e}")
         msg("Error:",f"{e}")
         exit()
-
+#=============================================================================================
 start()
-stop=False
-thread1=threading.Thread(target=job1)
-thread2=threading.Thread(target=job2)
+thread1=threading.Thread(target=choose_menu_job)
 thread1.daemon = True
-thread2.daemon = True
 thread1.start()
-thread2.start()
-try:
-    while True:
-        time.sleep(1000000)
-except KeyboardInterrupt:
-    log_out("程式被手動停止")
-    msg("manually stop")
-    exit()
+homepage()
