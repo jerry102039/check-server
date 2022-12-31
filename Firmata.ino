@@ -3,8 +3,6 @@
 #include <Firmata.h>
 #include <LiquidCrystal.h>
 LiquidCrystal lcd(8,9,4,5,6,7);
-// In order to use software serial, you will need to compile this sketch with
-// Arduino IDE v1.6.6 or higher. Hardware serial should work back to Arduino 1.0.
 #include "utility/SerialFirmata.h"
 
 #define I2C_WRITE                   B00000000
