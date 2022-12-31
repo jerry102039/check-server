@@ -10,6 +10,8 @@ def homepage():
                 cpu_and_memory()
             for a in range(int(homepage_waittime/network_waittime)):
                 network(network_LAN_inf)
+            for a in range(int(homepage_waittime/network_waittime)):
+                network(network_WAN_inf)
     except KeyboardInterrupt:
         log_out("程式被手動停止")
         msg("manually stop")
@@ -27,6 +29,7 @@ def choose_menu_job1():
     global user_select
     try:
         while True:
+            #確認是否要進入選單
             if check_button(button_right):
                 in_choose_menu+=1
                 is_button_right_yes=1
@@ -40,7 +43,8 @@ def choose_menu_job1():
                     menu=0
                     is_button_right_yes=0
                     order=0
-            elif check_button(button_select):
+            #確認select是否有被按下
+            if check_button(button_select):
                 in_choose_menu=0
                 if in_choose_menu==0 and is_button_right_yes==1:
                     lock.release()
@@ -48,18 +52,20 @@ def choose_menu_job1():
                     menu=0
                     is_button_right_yes=0
             if menu==1:
+                #用up和down調整選單順序
                 if check_button(button_up):
                     order-=1
                 elif check_button(button_down):
                     order+=1
+                #顯示選單項目
                 if order==0:
                     msg("homepage")
                 elif order==1:
                     msg("cpu and memory")
                 elif order==2:
-                    msg("network")
+                    msg("network(LAN)")
                 elif order==3:
-                    msg("menu test")
+                    msg("network(WAN)")
                 elif order>3 or order<0:
                     order=0
             time.sleep(0.01)
@@ -86,12 +92,14 @@ def choose_menu_job2():
                     cpu_and_memory()
                 if order==2:
                     network(network_LAN_inf)
-            print(user_select)
+                if order==3:
+                    network(network_WAN_inf)
             time.sleep(0.01)
     except Exception as e:
         log_out(f"發生錯誤,錯誤為:{e}")
         msg("Error:",f"{e}")
         exit()
+#=============================================================================================
 start()
 thread1=threading.Thread(target=choose_menu_job1)
 thread2=threading.Thread(target=choose_menu_job2)

@@ -22,6 +22,7 @@ network_waittime=config.getfloat("wait_time","network_waittime")
 network_LAN_inf=config.get("global","network_LAN_inf")
 network_WAN_inf=config.get("global","network_WAN_inf")
 homepage_waittime=config.getint("wait_time","homepage_waittime")
+servername=config.get("global","servername")
 button_right=range(0,60)
 button_up=range(60,200)
 button_down=range(200,400)
@@ -32,7 +33,7 @@ lcdlight=0
 order=0
 user_select=0
 #=============================================================================================
-def start():
+def start():#讓Arduino連線
     global board
     log_out("開始執行")
     try:
@@ -54,7 +55,7 @@ def start():
         msg(f"Loading{a}")
     log_out("開始發送數據")
 #=============================================================================================
-def msg(text1:str,text2:str=" "):
+def msg(text1:str,text2:str=" "):#讓Lcd印出文字
     lock.acquire()
     if text1 or text2:
         board.send_sysex(STRING_DATA,util.str_to_two_byte_iter(f"{text1}               "))
@@ -63,7 +64,7 @@ def msg(text1:str,text2:str=" "):
         board.send_sysex(STRING_DATA,util.str_to_two_byte_iter(' '))
     lock.release()
 #=============================================================================================
-def ping_service(service:str,ip:str):
+def ping_service(service:str,ip:str):#ping某個服務
     if ping(ip,timeout=ping_waittime):
         log_out(f"{service}=> OK")
         msg(f"{service}=> OK")
@@ -71,7 +72,7 @@ def ping_service(service:str,ip:str):
         log_out(f"{service}=> Error")
         msg(f"{service}=> Error")
 #=============================================================================================
-def analong(pin:int)-> int:
+def analong(pin:int)-> int:#讀取數位訊號
     time.sleep(0.001)
     lock.acquire()
     analong_read=board.analog[pin].read()
@@ -81,12 +82,12 @@ def analong(pin:int)-> int:
         return int(analong_read*1023)
     return 1023
 #=============================================================================================
-def cpu_and_memory():
+def cpu_and_memory():#顯示CPU和memory狀態
     cpu=f"cpu:    {psutil.cpu_percent(interval=cpu_and_memory_waittime)}%"
     memory=f"memory: {psutil.virtual_memory().percent}%"
     msg(cpu,memory)
 #=============================================================================================
-def network(connect:str):
+def network(connect:str):#顯示網路狀態
     net_stat = psutil.net_io_counters(pernic=True)[connect]
     net_in_1 = net_stat.bytes_recv
     net_out_1 = net_stat.bytes_sent
@@ -98,7 +99,7 @@ def network(connect:str):
     net_out = round((net_out_2-net_out_1)/1024/1024*8,3)
     msg(f"in: {net_in} Mbps",f"out:{net_out} Mbps")
 #=============================================================================================
-def check_button(button:range):
+def check_button(button:range):#判斷按鍵是否有被按下
     global button_open
     now_analong=analong(0)
     while now_analong<1000 and button_open==True and now_analong in button:
@@ -109,7 +110,7 @@ def check_button(button:range):
             button_open=True
         return False
 #=============================================================================================
-def lcd_light_breathe():
+def lcd_light_breathe():#讓Lcd的背光呼吸
     global lcdlight
     global light_change
     if lcdlight>1 or lcdlight<0:
@@ -119,23 +120,29 @@ def lcd_light_breathe():
     lock.release()
     lcdlight+=light_change
 #=============================================================================================
-def log_out(text:str):
-    if os.stat("check.log").st_size/(1024 * 1024) <logfile_size:
-        writemode="a"
-    else:
-        writemode="w"
-    with open("check.log",writemode,encoding="utf-8") as log:
-        print(f"[{datetime.now()}] {text}",file=log)
-        print(text)
+def log_out(text:str):#輸出文字到Log中
+    try:
+        if os.stat("check.log").st_size/(1024 * 1024) <logfile_size:
+            writemode="a"
+        else:
+            writemode="w"
+        with open("check.log",writemode,encoding="utf-8") as log:
+            print(f"[{datetime.now()}] {text}",file=log)
+            print(text)
+    except:
+        with open("check.log","w",encoding="utf=8") as log:
+            print(f"[{datetime.now()}] {text}",file=log)
+            print(text)
+
 #=============================================================================================
-def runtime():
+def runtime():#顯示服務器運作時間
     global boot_runtime2
     global boot_runtime1
     boot_runtime1=str(datetime.now()-boottime).split('.')[0]
     time.sleep(0.001)
     boot_runtime2=str(datetime.now()-boottime).split('.')[0]
     if boot_runtime1!=boot_runtime2:
-        msg("Jerryserver",f"Run: {boot_runtime1}")
+        msg(servername,f"Run: {boot_runtime1}")
         return 1
     return 0
 #=============================================================================================
