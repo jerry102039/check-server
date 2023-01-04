@@ -51,6 +51,8 @@ def choose_menu_job1():
                     user_select=1
                     menu=0
                     is_button_right_yes=0
+            if check_button(button_left) and user_select>=1:
+                user_select=-1
             if menu==1:
                 #用up和down調整選單順序
                 if check_button(button_up):
@@ -66,7 +68,9 @@ def choose_menu_job1():
                     msg("network(LAN)")
                 elif order==3:
                     msg("network(WAN)")
-                elif order>3 or order<0:
+                elif order==4:
+                    msg("ping all service")
+                elif order>4 or order<0:
                     order=0
             time.sleep(0.01)
     except Exception as e:
@@ -78,7 +82,7 @@ def choose_menu_job2():
     global user_select
     try:
         while True:
-            if check_button(button_left) and user_select>=1:
+            if user_select==-1:
                 lock.release()
                 user_select=0
             if user_select==1:
@@ -94,6 +98,8 @@ def choose_menu_job2():
                     network(network_LAN_inf)
                 if order==3:
                     network(network_WAN_inf)
+                if order==4:
+                    thread3.run()
             time.sleep(0.01)
     except Exception as e:
         log_out(f"發生錯誤,錯誤為:{e}")
@@ -103,8 +109,10 @@ def choose_menu_job2():
 start()
 thread1=threading.Thread(target=choose_menu_job1)
 thread2=threading.Thread(target=choose_menu_job2)
+thread3=threading.Thread(target=ping_all_service)
 thread1.daemon = True
 thread2.daemon = True
+thread3.daemon = True
 thread1.start()
 thread2.start()
 homepage()

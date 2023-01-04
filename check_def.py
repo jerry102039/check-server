@@ -6,6 +6,7 @@ import os
 import configparser
 from datetime import datetime
 import threading
+import json
 #=============================================================================================
 lock=threading.RLock()
 config=configparser.ConfigParser()
@@ -23,6 +24,7 @@ network_LAN_inf=config.get("global","network_LAN_inf")
 network_WAN_inf=config.get("global","network_WAN_inf")
 homepage_waittime=config.getint("wait_time","homepage_waittime")
 servername=config.get("global","servername")
+want_ping_service=json.loads(config.get("global","want_ping_service"))
 button_right=range(0,60)
 button_up=range(60,200)
 button_down=range(200,400)
@@ -63,14 +65,6 @@ def msg(text1:str,text2:str=" "):#讓Lcd印出文字
     else:
         board.send_sysex(STRING_DATA,util.str_to_two_byte_iter(' '))
     lock.release()
-#=============================================================================================
-def ping_service(service:str,ip:str):#ping某個服務
-    if ping(ip,timeout=ping_waittime):
-        log_out(f"{service}=> OK")
-        msg(f"{service}=> OK")
-    else:
-        log_out(f"{service}=> Error")
-        msg(f"{service}=> Error")
 #=============================================================================================
 def analong(pin:int)-> int:#讀取數位訊號
     time.sleep(0.001)
@@ -133,7 +127,6 @@ def log_out(text:str):#輸出文字到Log中
         with open("check.log","w",encoding="utf=8") as log:
             print(f"[{datetime.now()}] {text}",file=log)
             print(text)
-
 #=============================================================================================
 def runtime():#顯示服務器運作時間
     global boot_runtime2
@@ -146,4 +139,15 @@ def runtime():#顯示服務器運作時間
         return 1
     return 0
 #=============================================================================================
-#print(psutil.sensors_temperatures()['coretemp'][0].current)
+def ping_service(service:str,ip:str):#ping某個服務
+    if ping(ip,timeout=ping_waittime):
+        log_out(f"{service}=> OK")
+        #msg(f"{service}=> OK")
+    else:
+        log_out(f"{service}=> Error")
+        #msg(f"{service}=> Error")
+#=============================================================================================
+def ping_all_service():
+    for service in want_ping_service:
+        ping_service(service,want_ping_service[service])
+#=============================================================================================
