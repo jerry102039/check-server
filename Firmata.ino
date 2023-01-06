@@ -1,56 +1,8 @@
-/*
-  Firmata is a generic protocol for communicating with microcontrollers
-  from software on a host computer. It is intended to work with
-  any host computer software package.
-
-  To download a host software package, please click on the following link
-  to open the list of Firmata client libraries in your default browser.
-
-  https://github.com/firmata/arduino#firmata-client-libraries
-
-  Copyright (C) 2006-2008 Hans-Christoph Steiner.  All rights reserved.
-  Copyright (C) 2010-2011 Paul Stoffregen.  All rights reserved.
-  Copyright (C) 2009 Shigeru Kobayashi.  All rights reserved.
-  Copyright (C) 2009-2016 Jeff Hoefs.  All rights reserved.
-
-  This library is free software; you can redistribute it and/or
-  modify it under the terms of the GNU Lesser General Public
-  License as published by the Free Software Foundation; either
-  version 2.1 of the License, or (at your option) any later version.
-
-  See file LICENSE.txt for further informations on licensing terms.
-
-  Last updated August 17th, 2017
-*/
-
-/*
-  README
-
-  StandardFirmataPlus adds additional features that may exceed the Flash and
-  RAM sizes of Arduino boards such as ATMega328p (Uno) and ATMega32u4
-  (Leonardo, Micro, Yun, etc). It is best to use StandardFirmataPlus with higher
-  memory boards such as the Arduino Mega, Arduino Due, Teensy 3.0/3.1/3.2.
-
-  All Firmata examples that are appended with "Plus" add the following features:
-
-  - Ability to interface with serial devices using UART, USART, or SoftwareSerial
-    depending on the capatilities of the board.
-
-  NOTE: In order to use SoftwareSerial with the Firmata Serial feature,
-  StandardFirmataPlus must be compiled with Arduino v1.6.6 or newer.
-
-  At the time of this writing, StandardFirmataPlus will still compile and run
-  on ATMega328p and ATMega32u4-based boards, but future versions of this sketch
-  may not as new features are added.
-*/
-
 #include <Servo.h>
 #include <Wire.h>
 #include <Firmata.h>
 #include <LiquidCrystal.h>
 LiquidCrystal lcd(8,9,4,5,6,7);
-// In order to use software serial, you will need to compile this sketch with
-// Arduino IDE v1.6.6 or higher. Hardware serial should work back to Arduino 1.0.
 #include "utility/SerialFirmata.h"
 
 #define I2C_WRITE                   B00000000
